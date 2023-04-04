@@ -27,14 +27,12 @@ app.use(morgan("dev"));
 
 app.use("/api/v1/user", userRoutes);
 
-//Port
-
-const PORT = process.env.PORT || 27017;
-
+// Port
+const PORT = process.env.PORT || 8080;
 //listen
-
 app.listen(PORT, () => {
   console.log(
-    `Server listening on ${process.env.DEV_MODE} port no ${PORT}`.bgCyan.white
+    `Server Running on ${process.env.DEV_MODE} mode port no ${PORT}`.bgCyan
+      .white
   );
 });

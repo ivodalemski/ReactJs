@@ -6,17 +6,15 @@ const {
 } = require("../controllers/userController");
 
 //router object
-
 const router = express.Router();
 
-//GET ALL USERS || GET
+// GET ALL USERS || GET
 router.get("/all-users", getAllUsers);
 
-//CREATE USER || PUSH
+// CREATE USER || POST
 router.post("/register", registerController);
 
 //LOGIN || POST
-
 router.post("/login", loginController);
 
 module.exports = router;
