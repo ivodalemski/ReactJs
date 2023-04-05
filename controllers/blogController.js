@@ -5,7 +5,7 @@ const userModel = require("../models/userModel");
 //GET ALL BLOGS
 exports.getAllBlogsController = async (req, res) => {
   try {
-    const blogs = await blogModel.find({});
+    const blogs = await blogModel.find({}).populate("user");
     if (!blogs) {
       return res.status(200).send({
         success: false,
@@ -31,15 +31,30 @@ exports.getAllBlogsController = async (req, res) => {
 //Create Blog
 exports.createBlogController = async (req, res) => {
   try {
-    const { title, description, image } = req.body;
+    const { title, description, image, user } = req.body;
     //validation
-    if (!title || !description || !image) {
+    if (!title || !description || !image || !user) {
       return res.status(400).send({
         success: false,
         message: "Please Provide ALl Fields",
       });
     }
-    const newBlog = new blogModel({ title, description, image });
+    const exisitingUser = await userModel.findById(user);
+    //validaton
+    if (!exisitingUser) {
+      return res.status(404).send({
+        success: false,
+        message: "unable to find user",
+      });
+    }
+
+    const newBlog = new blogModel({ title, description, image, user });
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    await newBlog.save({ session });
+    exisitingUser.blogs.push(newBlog);
+    await exisitingUser.save({ session });
+    await session.commitTransaction();
     await newBlog.save();
     return res.status(201).send({
       success: true,
@@ -89,7 +104,7 @@ exports.getBlogByIdController = async (req, res) => {
     if (!blog) {
       return res.status(404).send({
         success: false,
-        message: "blog not found with this id",
+        message: "blog not found with this is",
       });
     }
     return res.status(200).send({
@@ -110,12 +125,11 @@ exports.getBlogByIdController = async (req, res) => {
 //Delete Blog
 exports.deleteBlogController = async (req, res) => {
   try {
-    //  const blog = await blogModel
-    await blogModel.findOneAndDelete(req.params.id);
-    // .findByIdAndDelete(req.params.id)
-    //.populate("user");
-    //  await blog.user.blogs.pull(blog);
-    // await blog.user.save();
+    const blog = await blogModel
+      .findByIdAndDelete(req.params.id)
+      .populate("user");
+    await blog.user.blogs.pull(blog);
+    await blog.user.save();
     return res.status(200).send({
       success: true,
       message: "Blog Deleted!",
