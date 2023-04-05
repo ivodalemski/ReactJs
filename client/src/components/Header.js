@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   AppBar,
@@ -9,20 +10,35 @@ import {
   Tab,
 } from "@mui/material";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { authActions } from "../redux/store";
 const Header = () => {
-  //global state
-  const isLogin = useSelector((state) => state.isLogin);
-  console.log(isLogin);
+  // global state
+  let isLogin = useSelector((state) => state.isLogin);
+  isLogin = isLogin || localStorage.getItem("userId");
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   //state
   const [value, setValue] = useState();
+
+  //logout
+  const handleLogout = () => {
+    try {
+      dispatch(authActions.logout());
+      alert("Logout Successfully");
+      navigate("/login");
+      localStorage.clear();
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <>
       <AppBar position="sticky">
         <Toolbar>
-          <Typography variant="h4">My Blog App</Typography>
+          <Typography variant="h4">My Blog APP</Typography>
           {isLogin && (
-            <Box display={"flex"} marginLeft="auto" marginRight="auto">
+            <Box display={"flex"} marginLeft="auto" marginRight={"auto"}>
               <Tabs
                 textColor="inherit"
                 value={value}
@@ -30,11 +46,15 @@ const Header = () => {
               >
                 <Tab label="Blogs" LinkComponent={Link} to="/blogs" />
                 <Tab label="My Blogs" LinkComponent={Link} to="/my-blogs" />
+                <Tab
+                  label="Create Blog"
+                  LinkComponent={Link}
+                  to="/create-blog"
+                />
               </Tabs>
             </Box>
           )}
-
-          <Box display={"flex"} marginLeft={"auto"}>
+          <Box display={"flex"} marginLeft="auto">
             {!isLogin && (
               <>
                 <Button
@@ -54,7 +74,9 @@ const Header = () => {
               </>
             )}
             {isLogin && (
-              <Button sx={{ margin: 1, color: "white" }}>Logout</Button>
+              <Button onClick={handleLogout} sx={{ margin: 1, color: "white" }}>
+                Logout
+              </Button>
             )}
           </Box>
         </Toolbar>
