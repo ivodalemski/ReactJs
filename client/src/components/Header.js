@@ -26,7 +26,7 @@ const Header = () => {
     try {
       dispatch(authActions.logout());
       alert("Logout Successfully");
-      navigate("/login");
+      navigate("/");
       localStorage.clear();
     } catch (error) {
       console.log(error);
